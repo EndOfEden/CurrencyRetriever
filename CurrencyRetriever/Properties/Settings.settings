@@ -1,0 +1,17 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="CurrencyRetriever.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="CurrencyRate_BaseURL" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">https://api.fixer.io/</Value>
+    </Setting>
+    <Setting Name="CurrencyApp_DB" Type="(Connection string)" Scope="Application">
+      <DesignTimeValue Profile="(Default)">&lt;?xml version="1.0" encoding="utf-16"?&gt;
+&lt;SerializableConnectionString xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema"&gt;
+  &lt;ConnectionString&gt;Data Source=mydbinstance.cigiovxk3352.ap-southeast-1.rds.amazonaws.com;Initial Catalog=CurrencyApp;Persist Security Info=True;User ID=leckkaisiong;Password=Lks880513&lt;/ConnectionString&gt;
+  &lt;ProviderName&gt;System.Data.SqlClient&lt;/ProviderName&gt;
+&lt;/SerializableConnectionString&gt;</DesignTimeValue>
+      <Value Profile="(Default)">Data Source=mydbinstance.cigiovxk3352.ap-southeast-1.rds.amazonaws.com;Initial Catalog=CurrencyApp;Persist Security Info=True;User ID=leckkaisiong;Password=Lks880513</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>
