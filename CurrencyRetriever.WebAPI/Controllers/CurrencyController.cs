@@ -2,6 +2,7 @@
 using CurrencyRetriever.BusinessEntity;
 using log4net;
 using System;
+using System.Collections.Generic;
 
 namespace CurrencyRetriever.WebAPI.Controllers
 {
@@ -20,11 +21,29 @@ namespace CurrencyRetriever.WebAPI.Controllers
         /// </summary>
         [HttpGet]
         [Route("currency/{fromCurrency}/{toCurrency}")]
-        public CurrencyRateBE GetCurrencyRate(string fromCurrency, string toCurrency)
+        public CurrencyRateResult GetCurrencyRate(string fromCurrency, string toCurrency)
         {
             try
             {
                 return _currencyService.GetCurrencyRate(fromCurrency, toCurrency);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex);
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Get Currency Rate between two currencies within specified range
+        /// </summary>
+        [HttpGet]
+        [Route("currency/{fromCurrency}/{toCurrency}/{since}/{until}")]
+        public IEnumerable<CurrencyRateResult> GetCurrencyRate(string fromCurrency, string toCurrency, DateTime since, DateTime until)
+        {
+            try
+            {
+                return _currencyService.GetCurrencyRates(fromCurrency, toCurrency, since, until);
             }
             catch (Exception ex)
             {

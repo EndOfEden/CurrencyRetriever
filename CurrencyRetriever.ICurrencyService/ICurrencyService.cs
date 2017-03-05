@@ -1,9 +1,12 @@
 ﻿using CurrencyRetriever.BusinessEntity;
+using System;
+using System.Collections.Generic;
 
 namespace CurrencyRetriever.ICurrencyService
 {
     public interface ICurrencyService
     {
-        CurrencyRateBE GetCurrencyRate(string fromCurrency, string toCurrency);
+        CurrencyRateResult GetCurrencyRate(string fromCurrency, string toCurrency);
+        IEnumerable<CurrencyRateResult> GetCurrencyRates(string fromCurrency, string toCurrency, DateTime since, DateTime until);
     }
 }

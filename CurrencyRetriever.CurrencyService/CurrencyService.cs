@@ -5,12 +5,13 @@ using System.Data.SqlClient;
 using System.Configuration;
 using System.Data;
 using System.Linq;
+using System.Collections.Generic;
 
 namespace CurrencyRetriever.CurrencyService
 {
     public class CurrencyService : ICurrencyService.ICurrencyService
     {
-        public CurrencyRateBE GetCurrencyRate(string fromCurrency, string toCurrency)
+        public CurrencyRateResult GetCurrencyRate(string fromCurrency, string toCurrency)
         {
             try
             {
@@ -22,12 +23,37 @@ namespace CurrencyRetriever.CurrencyService
                     p.Add("@fromCurrency", fromCurrency);
                     p.Add("@toCurrency", toCurrency);
 
-                    CurrencyRateBE currencyRates = sqlConnection.Query<CurrencyRateBE>("GetLatestCurrencyRate", p, commandType: CommandType.StoredProcedure).FirstOrDefault();
+                    CurrencyRateResult currencyRates = sqlConnection.Query<CurrencyRateResult>("GetLatestCurrencyRate", p, commandType: CommandType.StoredProcedure).FirstOrDefault();
 
                     return currencyRates;
                 }
             }
             catch(Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public IEnumerable<CurrencyRateResult> GetCurrencyRates(string fromCurrency, string toCurrency, DateTime since, DateTime until)
+        {
+            try
+            {
+                using (var sqlConnection = new SqlConnection(ConfigurationManager.ConnectionStrings["CurrencyAppDB"].ConnectionString))
+                {
+                    sqlConnection.Open();
+
+                    var p = new DynamicParameters();
+                    p.Add("@fromCurrency", fromCurrency);
+                    p.Add("@toCurrency", toCurrency);
+                    p.Add("@since", since);
+                    p.Add("@until", until);
+
+                    IEnumerable<CurrencyRateResult> currencyRates = sqlConnection.Query<CurrencyRateResult>("GetLatestCurrencyRateRange", p, commandType: CommandType.StoredProcedure);
+
+                    return currencyRates;
+                }
+            }
+            catch (Exception ex)
             {
                 throw ex;
             }
