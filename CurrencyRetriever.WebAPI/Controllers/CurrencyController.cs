@@ -39,11 +39,29 @@ namespace CurrencyRetriever.WebAPI.Controllers
         /// </summary>
         [HttpGet]
         [Route("currency/{fromCurrency}/{toCurrency}/{since}/{until}")]
-        public IEnumerable<CurrencyRateResult> GetCurrencyRate(string fromCurrency, string toCurrency, DateTime since, DateTime until)
+        public IEnumerable<CurrencyRateResult> GetCurrencyRates(string fromCurrency, string toCurrency, DateTime since, DateTime until)
         {
             try
             {
                 return _currencyService.GetCurrencyRates(fromCurrency, toCurrency, since, until);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex);
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Get Currency Rate between two currencies on specific date
+        /// </summary>
+        [HttpGet]
+        [Route("currency/{fromCurrency}/{toCurrency}/{date}")]
+        public CurrencyRateResult GetCurrencyRate(string fromCurrency, string toCurrency, DateTime date)
+        {
+            try
+            {
+                return _currencyService.GetCurrencyRate(fromCurrency, toCurrency, date);
             }
             catch (Exception ex)
             {

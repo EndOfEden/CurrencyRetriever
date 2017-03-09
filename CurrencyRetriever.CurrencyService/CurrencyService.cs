@@ -58,5 +58,29 @@ namespace CurrencyRetriever.CurrencyService
                 throw ex;
             }
         }
+
+        public CurrencyRateResult GetCurrencyRate(string fromCurrency, string toCurrency, DateTime date)
+        {
+            try
+            {
+                using (var sqlConnection = new SqlConnection(ConfigurationManager.ConnectionStrings["CurrencyAppDB"].ConnectionString))
+                {
+                    sqlConnection.Open();
+
+                    var p = new DynamicParameters();
+                    p.Add("@fromCurrency", fromCurrency);
+                    p.Add("@toCurrency", toCurrency);
+                    p.Add("@date", date);
+
+                    CurrencyRateResult currencyRate = sqlConnection.Query<CurrencyRateResult>("GetCurrencyRateOnDate", p, commandType: CommandType.StoredProcedure).FirstOrDefault();
+
+                    return currencyRate;
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
     }
 }
