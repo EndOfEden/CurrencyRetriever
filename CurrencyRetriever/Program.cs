@@ -35,67 +35,75 @@ namespace CurrencyRetriever
                         httpClient.BaseAddress = new Uri(Properties.Settings.Default.CurrencyRate_BaseURL);
                         httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/x-www-form-urlencoded"));
 
-                        //DateTime dateTime = new DateTime(2017, 1, 1);
+                        DateTime dateTime = new DateTime(2017, 3, 15);
 
-                        //while (dateTime.Date < DateTime.Now.Date)
-                        //{
-                            //dateTime = dateTime.AddDays(1);
-                            //string dateTimeString = dateTime.ToString("yyyy-MM-dd");
-
-                            //var response = httpClient.GetAsync($"latest/{dateTimeString}?base={currency.Code}").Result;
-
-                        var response = httpClient.GetAsync($"latest?base={currency.Code}").Result;
-                        string responseText = response.Content.ReadAsStringAsync().Result;
-
-                        RateResultBE rateResult = JsonConvert.DeserializeObject<RateResultBE>(responseText);
-
-                        CurrencyBE fromCurrency = currencies.FirstOrDefault(x => x.Code == rateResult.Base);
-
-                        if (fromCurrency == null)
+                        while (dateTime.Date < DateTime.Now.Date)
                         {
-                            var fromCodeParam = new DynamicParameters();
-                            fromCodeParam.Add("@code", rateResult.Base);
-
-                            fromCurrency = sqlConnection.Query<CurrencyBE>("InsertCurrency", fromCodeParam, commandType: CommandType.StoredProcedure).FirstOrDefault();
-                        }
-
-                        foreach (var rate in rateResult.Rates)
-                        {
-                            CurrencyBE toCurrency = currencies.FirstOrDefault(x => x.Code == rate.Key);
-
-                            if (toCurrency == null)
+                            try
                             {
-                                var toCodeParam = new DynamicParameters();
-                                toCodeParam.Add("@code", rate.Key);
+                                dateTime = dateTime.AddDays(1);
+                                string dateTimeString = dateTime.ToString("yyyy-MM-dd");
 
-                                toCurrency = sqlConnection.Query<CurrencyBE>("InsertCurrency", toCodeParam, commandType: CommandType.StoredProcedure).FirstOrDefault();
-                            }
+                                var response = httpClient.GetAsync($"latest/{dateTimeString}?base={currency.Code}").Result;
 
-                            DateTime rateDate = DateTime.ParseExact(rateResult.Date, "yyyy-MM-dd", null);
-                            decimal actualRate = 0;
+                                //var response = httpClient.GetAsync($"latest?base={currency.Code}").Result;
+                                string responseText = response.Content.ReadAsStringAsync().Result;
 
-                            if (!Decimal.TryParse(rate.Value, NumberStyles.Any, CultureInfo.InvariantCulture, out actualRate))
-                            {
-                                log.Error($"Unable to convert value {rate.Value} to decimal.");
+                                RateResultBE rateResult = JsonConvert.DeserializeObject<RateResultBE>(responseText);
+
+                                CurrencyBE fromCurrency = currencies.FirstOrDefault(x => x.Code == rateResult.Base);
+
+                                if (fromCurrency == null)
+                                {
+                                    var fromCodeParam = new DynamicParameters();
+                                    fromCodeParam.Add("@code", rateResult.Base);
+
+                                    fromCurrency = sqlConnection.Query<CurrencyBE>("InsertCurrency", fromCodeParam, commandType: CommandType.StoredProcedure).FirstOrDefault();
+                                }
+
+                                foreach (var rate in rateResult.Rates)
+                                {
+                                    CurrencyBE toCurrency = currencies.FirstOrDefault(x => x.Code == rate.Key);
+
+                                    if (toCurrency == null)
+                                    {
+                                        var toCodeParam = new DynamicParameters();
+                                        toCodeParam.Add("@code", rate.Key);
+
+                                        toCurrency = sqlConnection.Query<CurrencyBE>("InsertCurrency", toCodeParam, commandType: CommandType.StoredProcedure).FirstOrDefault();
+                                    }
+
+                                    DateTime rateDate = DateTime.ParseExact(rateResult.Date, "yyyy-MM-dd", null);
+                                    decimal actualRate = 0;
+
+                                    if (!Decimal.TryParse(rate.Value, NumberStyles.Any, CultureInfo.InvariantCulture, out actualRate))
+                                    {
+                                        log.Error($"Unable to convert value {rate.Value} to decimal.");
 #if DEBUG
-                                Console.WriteLine($"Unable to convert value {rate.Value} to decimal.");
+                                        Console.WriteLine($"Unable to convert value {rate.Value} to decimal.");
+#endif
+                                    }
+
+                                    var rateParam = new DynamicParameters();
+                                    rateParam.Add("@fromCurrency", fromCurrency.Id);
+                                    rateParam.Add("@toCurrency", toCurrency.Id);
+                                    rateParam.Add("@rate", actualRate);
+                                    rateParam.Add("@year", rateDate.Year);
+                                    rateParam.Add("@month", rateDate.Month);
+                                    rateParam.Add("@day", rateDate.Day);
+
+                                    sqlConnection.Execute("UpsertCurrencyRateHistory", rateParam, commandType: CommandType.StoredProcedure);
+                                }
+#if DEBUG
+                                Console.WriteLine(responseText);
 #endif
                             }
-
-                            var rateParam = new DynamicParameters();
-                            rateParam.Add("@fromCurrency", fromCurrency.Id);
-                            rateParam.Add("@toCurrency", toCurrency.Id);
-                            rateParam.Add("@rate", actualRate);
-                            rateParam.Add("@year", rateDate.Year);
-                            rateParam.Add("@month", rateDate.Month);
-                            rateParam.Add("@day", rateDate.Day);
-
-                            sqlConnection.Execute("UpsertCurrencyRateHistory", rateParam, commandType: CommandType.StoredProcedure);
+                            catch
+                            {
+                                dateTime = dateTime.AddDays(-1);
+                                continue;
+                            }
                         }
-#if DEBUG
-                        Console.WriteLine(responseText);
-#endif
-                        //}
                     }
                 }
 
