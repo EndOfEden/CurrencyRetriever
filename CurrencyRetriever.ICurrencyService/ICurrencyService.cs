@@ -7,6 +7,7 @@ namespace CurrencyRetriever.ICurrencyService
     public interface ICurrencyService
     {
         CurrencyRateResult GetCurrencyRate(string fromCurrency, string toCurrency);
+        IEnumerable<CurrencyBE> GetCurrencyList();
         IEnumerable<CurrencyRateResult> GetCurrencyRates(string fromCurrency, string toCurrency, DateTime since, DateTime until);
         CurrencyRateResult GetCurrencyRate(string fromCurrency, string toCurrency, DateTime date);
     }

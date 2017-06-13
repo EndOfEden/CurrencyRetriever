@@ -34,6 +34,25 @@ namespace CurrencyRetriever.CurrencyService
             }
         }
 
+        public IEnumerable<CurrencyBE> GetCurrencyList()
+        {
+            try
+            {
+                using (var sqlConnection = new SqlConnection(ConfigurationManager.ConnectionStrings["CurrencyAppDB"].ConnectionString))
+                {
+                    sqlConnection.Open();
+
+                    IEnumerable<CurrencyBE> currencyList = sqlConnection.Query<CurrencyBE>("SELECT Id, Name, Code, Country FROM Currency");
+
+                    return currencyList;
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
         public IEnumerable<CurrencyRateResult> GetCurrencyRates(string fromCurrency, string toCurrency, DateTime since, DateTime until)
         {
             try

@@ -17,6 +17,24 @@ namespace CurrencyRetriever.WebAPI.Controllers
         }
 
         /// <summary>
+        /// Get Currency Rate between two currencies within specified range
+        /// </summary>
+        [HttpGet]
+        [Route("currency/list")]
+        public IEnumerable<CurrencyBE> GetCurrencyList()
+        {
+            try
+            {
+                return _currencyService.GetCurrencyList();
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex);
+                return null;
+            }
+        }
+
+        /// <summary>
         /// Get Currency Rate between two currencies
         /// </summary>
         [HttpGet]
